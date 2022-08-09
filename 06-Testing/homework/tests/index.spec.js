@@ -16,7 +16,7 @@ describe('Test de APIS', () => {
     it('responds with 200', () => agent.get('/test').expect(200));
     it('responds with and object with message `test`', () =>
       agent.get('/test').then((res) => {
-        expect(res.body.message).toEqual('hola');
+        expect(res.body.message).toEqual('test');
       }));
   });
 
@@ -42,15 +42,83 @@ describe('Test de APIS', () => {
     );
   });
 
-  describe('POST /sumArray', () => {
-    it('responds with 200', () => agent.get('/test').expect(200));
-    it('responds with and object with message `test`', () =>
-      agent.post('/sumArray')
-        .send({array: [2,5,7,10,11,15,20], num: 13})
-        .then((res) => {
-          expect(res.body.result).toEqual(true);
-      }));
-  });
-
 });
+describe('POST /sumArray', () => {
+  it('responds with 200', () => { 
+    agent.post('/sumArray').send({array: [2,5], num: 1})
+    .expect(200)
+  });
+  it('responds with ...', () =>
+    agent.post('/sumArray')
+      .send({array: [2,5,7,10,11,15,20], num: 13})
+      .then((res) => {
+        expect(res.body.result).toEqual(true);
+    })
+  );
+  it('responds with False if...', () => {
+    agent.post('/sumArray')
+    .send({array: [2,5,7,10,11,15,20], num: 1})
+    .then(res => {
+      expect(res.body.result).toEqual(false)
+    })
+  })
+
+  it('responds with False if...', () => {
+    agent.post('/sumArray')
+    .send({array: [2,5,7,10,11,15,20], num: 10})
+    .then(res => {
+      expect(res.body.result).toEqual(false)
+    })
+  })
+});
+
+describe('POST /numString', () => {
+  it('responds with 400 if string is a number', () => {
+    agent.post('/numString').send({string: 80}).expect(400)
+  })
+  it('responds with 400 if string is empty', () => {
+    agent.post('/numString').send({string: ""}).expect(400)
+  })
+  it('responds with 200 if...', () => {
+    agent.post('/numString').send({string: 'hola'}).expect(200)
+  })
+  it('responds with 200 if...', () => {
+    return agent.post('/numString').send({string: 'hola'})
+    .then(res => {
+      expect(res.body.result).toEqual(4)
+    })
+  })
+})
+
+describe('POST /pluck', () => {
+
+  const array = [ 
+    {alumno: 'Juan', edad: 30, carrera: 'fullstack'},
+    {alumno: 'Nico', edad: 20, carrera: 'data'},
+    {alumno: 'Leo', edad: 50, carrera: 'fullstack'}
+  ]
+  it('responds with 400 if...', () => {
+    agent.post('/pluck').send({array: 101, prop: 'edad'}).expect(400)
+  })
+  it('responds with 400 if...', () => {
+    agent.post('/pluck').send({array: array, prop: ''}).expect(400)
+  })
+  it('responds with 200 if...', () => {
+    agent.post('/pluck').send({array: array, prop: 'edad'}).expect(200)
+  })
+  it('responds with 200 if...', () => {
+   return agent.post('/pluck').send({array: array, prop: 'edad'})
+    .then(res => {
+      expect(res.body.result).toEqual([30, 20, 50])
+    })
+  })
+  it('responds with 200 if...', () => {
+    return agent.post('/pluck').send({array: array, prop: 'edad'})
+     .then(res => {
+       expect(res.body.result).toEqual([30, 20, 51])
+     })
+   })
+})
+
+
 
